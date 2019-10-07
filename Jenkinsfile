@@ -13,6 +13,26 @@ pipeline {
             }
         }
 
+        stage('Provisión Environment Aks on Azure') {
+            steps {
+                checkout([
+                        $class                           : 'GitSCM',
+                        branches                         : [[name: "master"], [name: 'development'], [name: 'release']],
+                        extensions                       : [[$class: 'CheckoutOption', timeout: 100], [$class: 'CloneOption', timeout: 100]],
+                        userRemoteConfigs                : [[credentialsId: "7d87c24d-4c5b-4019-9396-6fb9e55ddb91", url: "https://johndominguez@bitbucket.org/johndominguez/terraform-aks.git"]],
+                        doGenerateSubmoduleConfigurations: false
+                ])
+                script {
+                    sh "ls"
+                    sh "pwd"
+                    sh "terraform init"
+                    sh "terraform plan"
+                    sh "terraform apply -auto-approve -lock=false"
+                    sh 'echo Hello, World!'
+                }
+            }
+        }
+
         stage('Build Docker Image') {
             steps {
                 script {
@@ -38,9 +58,9 @@ pipeline {
                 input 'Deploy to Production?'
                 milestone(1)
                 kubernetesDeploy(
-                    kubeconfigId: 'new_kubernetes',
-                    configs: 'train-schedule-kube.yml',
-                    enableConfigSubstitution: true
+                        kubeconfigId: 'new_kubernetes',
+                        configs: 'train-schedule-kube.yml',
+                        enableConfigSubstitution: true
                 )
             }
         }

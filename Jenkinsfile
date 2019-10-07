@@ -55,13 +55,12 @@ pipeline {
 
         stage('DeployToProduction') {
             steps {
-                input 'Deploy to Production?'
-                milestone(1)
-                kubernetesDeploy(
-                        kubeconfigId: 'new_kubernetes',
-                        configs: 'train-schedule-kube.yml',
-                        enableConfigSubstitution: true
-                )
+                script {
+                    input 'Deploy to Production?'
+                    sh "az login --service-principal -u $AZURE_URL -p $PASSWORD --tenant $TENANT_ID"
+                    sh "rm -rf ~/.kube/"
+                    sh "az aks get-credentials --resource-group AKS-DEVOPS-RG --name aks-dev-cluster "
+                }
             }
         }
     }

@@ -13,6 +13,28 @@ pipeline {
             }
         }
 
+        stage('Build Docker Image') {
+            steps {
+                script {
+                    app = docker.build(DOCKER_IMAGE_NAME)
+                    app.inside {
+                        sh 'echo Hello, World!'
+                    }
+                }
+            }
+        }
+
+        stage('Push Docker Image') {
+            steps {
+                script {
+                    docker.withRegistry('https://registry.hub.docker.com', 'docker_hub_login') {
+                        app.push("${env.BUILD_NUMBER}")
+                        app.push("release-candidate")
+                    }
+                }
+            }
+        }
+
         stage('Provisión Environment Aks on Azure') {
             steps {
                 checkout([
@@ -24,35 +46,13 @@ pipeline {
                 ])
                 script {
                     sh "ls"
-                    sh "pwd"
                     sh "terraform init"
                     sh "terraform plan"
                     sh "terraform apply -auto-approve -lock=false"
-                    sh 'echo Hello, World!'
                 }
             }
         }
 
-        stage('Build Docker Image') {
-            steps {
-                script {
-                    app = docker.build(DOCKER_IMAGE_NAME)
-                    app.inside {
-                        sh 'echo Hello, World!'
-                    }
-                }
-            }
-        }
-        stage('Push Docker Image') {
-            steps {
-                script {
-                    docker.withRegistry('https://registry.hub.docker.com', 'docker_hub_login') {
-                        app.push("${env.BUILD_NUMBER}")
-                        app.push("latest")
-                    }
-                }
-            }
-        }
         stage('DeployToProduction') {
             steps {
                 input 'Deploy to Production?'

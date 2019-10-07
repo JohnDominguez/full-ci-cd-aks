@@ -56,10 +56,14 @@ pipeline {
         stage('DeployToProduction') {
             steps {
                 script {
-                    input 'Deploy to Production?'
-                    sh "az login --service-principal -u $AZURE_URL -p $PASSWORD --tenant $TENANT_ID"
-                    sh "rm -rf ~/.kube/"
-                    sh "az aks get-credentials --resource-group AKS-DEVOPS-RG --name aks-dev-cluster "
+                    withCredentials([string(credentialsId: 'azure_password', variable: 'PASSWORD'),
+                                     string(credentialsId: 'azure_user', variable: 'AZURE_URL'),
+                                     string(credentialsId: 'azure_tenant_id', variable: 'TENANT_ID')]) {
+                        input 'Deploy to Production?'
+                        sh "az login --service-principal -u $AZURE_URL -p $PASSWORD --tenant $TENANT_ID"
+                        sh "rm -rf ~/.kube/"
+                        sh "az aks get-credentials --resource-group AKS-DEVOPS-RG --name aks-dev-cluster "
+                    }
                 }
             }
         }

@@ -1,5 +1,5 @@
 pipeline {
-    agent {label 'master'}
+    agent { label 'master' }
     environment {
         //be sure to replace "willbla" with your own Docker Hub username
         DOCKER_IMAGE_NAME = "jdominguez/train-schedule:latest"
@@ -7,13 +7,7 @@ pipeline {
     stages {
         stage('Build') {
             steps {
-                checkout([
-                        $class                           : 'GitSCM',
-                        branches                         : [[name: "master"], [name: 'development'], [name: 'release']],
-                        extensions                       : [[$class: 'CheckoutOption', timeout: 100], [$class: 'CloneOption', timeout: 100]],
-                        userRemoteConfigs                : [[url: "https://github.com/JohnDominguez/full-ci-cd-aks.git"]],
-                        doGenerateSubmoduleConfigurations: false
-                ])
+
                 echo 'Running build automation'
                 sh './gradlew build --no-daemon'
                 archiveArtifacts artifacts: 'dist/trainSchedule.zip'
@@ -62,6 +56,13 @@ pipeline {
 
         stage('DeployToProduction') {
             steps {
+                checkout([
+                        $class                           : 'GitSCM',
+                        branches                         : [[name: "master"], [name: 'development'], [name: 'release']],
+                        extensions                       : [[$class: 'CheckoutOption', timeout: 100], [$class: 'CloneOption', timeout: 100]],
+                        userRemoteConfigs                : [[url: "https://github.com/JohnDominguez/full-ci-cd-aks.git"]],
+                        doGenerateSubmoduleConfigurations: false
+                ])
                 script {
                     withCredentials([string(credentialsId: 'azure_password', variable: 'PASSWORD'),
                                      string(credentialsId: 'azure_user', variable: 'AZURE_URL'),

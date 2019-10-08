@@ -64,6 +64,7 @@ pipeline {
                         sh "rm -rf ~/.kube/"
                         sh "az aks get-credentials --resource-group devops-rg-aks --name mas-aks-cluster"
                         sh "kubectl replace --force -f train-schedule-kube.yml"
+                        sh "Desplegando App "
                         sh "sleep 180s"
                         sh "echo revisa la app en la ip de la parte inferior por el puerto 8080"
                         sh "kubectl get service train-schedule-service -o template={{range.status.loadBalancer.ingress}}{{.ip}}{{end}})"

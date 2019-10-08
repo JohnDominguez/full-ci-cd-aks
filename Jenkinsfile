@@ -1,5 +1,5 @@
 pipeline {
-    agent any
+    agent master
     environment {
         //be sure to replace "willbla" with your own Docker Hub username
         DOCKER_IMAGE_NAME = "jdominguez/train-schedule:latest"
@@ -35,23 +35,23 @@ pipeline {
             }
         }
 
-//        stage('Provisión Environment Aks on Azure') {
-//            steps {
-//                checkout([
-//                        $class                           : 'GitSCM',
-//                        branches                         : [[name: "master"], [name: 'development'], [name: 'release']],
-//                        extensions                       : [[$class: 'CheckoutOption', timeout: 100], [$class: 'CloneOption', timeout: 100]],
-//                        userRemoteConfigs                : [[credentialsId: "7d87c24d-4c5b-4019-9396-6fb9e55ddb91", url: "https://johndominguez@bitbucket.org/johndominguez/terraform-aks.git"]],
-//                        doGenerateSubmoduleConfigurations: false
-//                ])
-//                script {
-//                    sh "ls"
-//                    sh "terraform init"
-//                    sh "terraform plan"
-//                    sh "terraform apply -auto-approve -lock=false"
-//                }
-//            }
-//        }
+        stage('Provisión Environment Aks on Azure') {
+            steps {
+                checkout([
+                        $class                           : 'GitSCM',
+                        branches                         : [[name: "master"], [name: 'development'], [name: 'release']],
+                        extensions                       : [[$class: 'CheckoutOption', timeout: 100], [$class: 'CloneOption', timeout: 100]],
+                        userRemoteConfigs                : [[credentialsId: "7d87c24d-4c5b-4019-9396-6fb9e55ddb91", url: "https://johndominguez@bitbucket.org/johndominguez/terraform-aks.git"]],
+                        doGenerateSubmoduleConfigurations: false
+                ])
+                script {
+                    sh "ls"
+                    sh "terraform init"
+                    sh "terraform plan"
+                    sh "terraform apply -auto-approve -lock=false"
+                }
+            }
+        }
 
         stage('DeployToProduction') {
             steps {

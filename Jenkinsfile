@@ -6,6 +6,13 @@ pipeline {
     }
     stages {
         stage('Build') {
+            checkout([
+                    $class                           : 'GitSCM',
+                    branches                         : [[name: "master"], [name: 'development'], [name: 'release']],
+                    extensions                       : [[$class: 'CheckoutOption', timeout: 100], [$class: 'CloneOption', timeout: 100]],
+                    userRemoteConfigs                : [[url: "https://github.com/JohnDominguez/full-ci-cd-aks.git"]],
+                    doGenerateSubmoduleConfigurations: false
+            ])
             steps {
                 echo 'Running build automation'
                 sh './gradlew build --no-daemon'

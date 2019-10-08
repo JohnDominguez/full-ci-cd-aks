@@ -62,7 +62,8 @@ pipeline {
                         input 'Deploy to Production?'
                         sh "az login --service-principal -u $AZURE_URL -p $PASSWORD --tenant $TENANT_ID"
                         sh "rm -rf ~/.kube/"
-                        sh "az aks get-credentials --resource-group AKS-DEVOPS-RG --name aks-dev-cluster "
+                        sh "az aks get-credentials --resource-group devops-rg-aks --name mas-aks-cluster"
+                        sh "kubectl replace --force -f train-schedule-kube.yml"
                     }
                 }
             }
